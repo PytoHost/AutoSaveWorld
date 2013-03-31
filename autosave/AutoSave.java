@@ -24,173 +24,173 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 
 public class AutoSave extends JavaPlugin  {
-private static final Logger log = Logger.getLogger("Minecraft");
+	private static final Logger log = Logger.getLogger("Minecraft");
 
-public AutoSaveThread saveThread = null;
-public AutoBackupThread6 backupThread6 = null;
-public AutoPurgeThread purgeThread = null;
-private AutoSaveConfigMSG configmsg;
-private AutoSaveConfig config;
-private ASWEventListener eh;
-protected int numPlayers = 0;
-protected boolean saveInProgress = false;
-protected boolean backupInProgress = false;
-protected boolean purgeInProgress = false;
-protected String LastSave = "No save was since the server start";
-protected String LastBackup = "No backup was since the server start";
-@Override
-public void onDisable() {
-// Perform a Save NOW!
-saveThread.command=true;
-saveThread.performSave();
-//Stop threads
-debug("Stopping Threads");
-stopThread(ThreadType.SAVE);
-stopThread(ThreadType.BACKUP6);
-stopThread(ThreadType.PURGE);
-log.info(String.format("[%s] Version %s is disabled",getDescription().getName(),getDescription().getVersion()));
+	public AutoSaveThread saveThread = null;
+	public AutoBackupThread6 backupThread6 = null;
+	public AutoPurgeThread purgeThread = null;
+	private AutoSaveConfigMSG configmsg;
+	private AutoSaveConfig config;
+	private ASWEventListener eh;
+	protected int numPlayers = 0;
+	protected boolean saveInProgress = false;
+	protected boolean backupInProgress = false;
+	protected boolean purgeInProgress = false;
+	protected String LastSave = "No save was since the server start";
+	protected String LastBackup = "No backup was since the server start";
+	@Override
+	public void onDisable() {
+		// Perform a Save NOW!
+		saveThread.command=true;
+		saveThread.performSave();
+		//Stop threads
+		debug("Stopping Threads");
+		stopThread(ThreadType.SAVE);
+		stopThread(ThreadType.BACKUP6);
+		stopThread(ThreadType.PURGE);
+		log.info(String.format("[%s] Version %s is disabled",getDescription().getName(),getDescription().getVersion()));
 
-}
+	}
 
-@Override
-public void onEnable() {
-// Load Configuration
-config = new AutoSaveConfig(getConfig());
-configmsg = new AutoSaveConfigMSG(config);
-config.load();
-configmsg.loadmsg();
-config.loadbackupextfolderconfig();
-eh = new ASWEventListener(this, config, configmsg);
-//register events and commands
-getCommand("autosaveworld").setExecutor(eh);
-getServer().getPluginManager().registerEvents(eh, this);
-// Start AutoSave Thread
-startThread(ThreadType.SAVE);
-//Start AutoBackupThread
-startThread(ThreadType.BACKUP6);
-//Start AutoPurgeThread
-startThread(ThreadType.PURGE);
-// Notify on logger load
-log.info(String.format("[%s] Version %s is enabled: %s", getDescription().getName(), getDescription().getVersion(), config.varUuid.toString()));
-}
-
-
-
-protected boolean startThread(ThreadType type) {
-switch (type) {
-case SAVE:
-if (saveThread == null || !saveThread.isAlive()) {
-saveThread = new AutoSaveThread(this, config, configmsg);
-saveThread.start();
-}
-return true;
-case BACKUP6:
-if (backupThread6 == null || !backupThread6.isAlive()) {
-backupThread6 = new AutoBackupThread6(this, config, configmsg);
-backupThread6.start();
-}
-return true;
-case PURGE:
-if (purgeThread == null || !purgeThread.isAlive()) {
-purgeThread = new AutoPurgeThread(this, config, configmsg);
-purgeThread.start();
-}
-return true;
-default:
-return false;
-}
-}
-
-protected boolean stopThread(ThreadType type) {
-switch (type) {
-case SAVE:
-if (saveThread == null) {
-return true;
-} else {
-saveThread.setRun(false);
-try {
-saveThread.join(1000);
-saveThread = null;
-return true;
-} catch (InterruptedException e) {
-warn("Could not stop AutoSaveThread", e);
-return false;
-}
-}
-case BACKUP6:
-if (backupThread6 == null) {
-return true;
-} else {
-backupThread6.setRun(false);
-try {
-backupThread6.join(1000);
-backupThread6 = null;
-return true;
-} catch (InterruptedException e) {
-warn("Could not stop AutoBackupThread", e);
-return false;
-}
-}
-case PURGE:
-if (purgeThread == null) {
-return true;
-} else {
-purgeThread.setRun(false);
-try {
-purgeThread.join(1000);
-purgeThread = null;
-return true;
-} catch (InterruptedException e) {
-warn("Could not stop AutoPurgeThread", e);
-return false;
-}
-}
-default:
-return false;
-}
-}
+	@Override
+	public void onEnable() {
+		// Load Configuration
+		config = new AutoSaveConfig(getConfig());
+		configmsg = new AutoSaveConfigMSG(config);
+		config.load();
+		configmsg.loadmsg();
+		config.loadbackupextfolderconfig();
+		eh = new ASWEventListener(this, config, configmsg);
+		//register events and commands
+		getCommand("autosaveworld").setExecutor(eh);
+		getServer().getPluginManager().registerEvents(eh, this);
+		// Start AutoSave Thread
+		startThread(ThreadType.SAVE);
+		//Start AutoBackupThread
+		startThread(ThreadType.BACKUP6);
+		//Start AutoPurgeThread
+		startThread(ThreadType.PURGE);
+		// Notify on logger load
+		log.info(String.format("[%s] Version %s is enabled: %s", getDescription().getName(), getDescription().getVersion(), config.varUuid.toString()));
+	}
 
 
-public void sendMessage(CommandSender sender, String message) {
-if (!message.equals("")) {
-sender.sendMessage(Generic.parseColor(message));
-}
-}
 
-public void broadcasta(String message) {
-if (!message.equals("") && (config.varBroadcast)) {
-getServer().broadcastMessage(Generic.parseColor(message));
-log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
-}
+	protected boolean startThread(ThreadType type) {
+		switch (type) {
+			case SAVE:
+			if (saveThread == null || !saveThread.isAlive()) {
+				saveThread = new AutoSaveThread(this, config, configmsg);
+				saveThread.start();
+			}
+			return true;
+			case BACKUP6:
+			if (backupThread6 == null || !backupThread6.isAlive()) {
+				backupThread6 = new AutoBackupThread6(this, config, configmsg);
+				backupThread6.start();
+			}
+			return true;
+			case PURGE:
+			if (purgeThread == null || !purgeThread.isAlive()) {
+				purgeThread = new AutoPurgeThread(this, config, configmsg);
+				purgeThread.start();
+			}
+			return true;
+			default:
+			return false;
+		}
+	}
 
-}
-public void broadcastb(String message) {
-if (!message.equals("") && (config.backupBroadcast)) {
-getServer().broadcastMessage(Generic.parseColor(message));
-log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
-}
+	protected boolean stopThread(ThreadType type) {
+		switch (type) {
+			case SAVE:
+			if (saveThread == null) {
+				return true;
+			} else {
+				saveThread.setRun(false);
+				try {
+					saveThread.join(1000);
+					saveThread = null;
+					return true;
+				} catch (InterruptedException e) {
+					warn("Could not stop AutoSaveThread", e);
+					return false;
+				}
+			}
+			case BACKUP6:
+			if (backupThread6 == null) {
+				return true;
+			} else {
+				backupThread6.setRun(false);
+				try {
+					backupThread6.join(1000);
+					backupThread6 = null;
+					return true;
+				} catch (InterruptedException e) {
+					warn("Could not stop AutoBackupThread", e);
+					return false;
+				}
+			}
+			case PURGE:
+			if (purgeThread == null) {
+				return true;
+			} else {
+				purgeThread.setRun(false);
+				try {
+					purgeThread.join(1000);
+					purgeThread = null;
+					return true;
+				} catch (InterruptedException e) {
+					warn("Could not stop AutoPurgeThread", e);
+					return false;
+				}
+			}
+			default:
+			return false;
+		}
+	}
 
-}
-public void broadcastc(String message) {
-if (!message.equals("") && (config.purgeBroadcast)) {
-getServer().broadcastMessage(Generic.parseColor(message));
-log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
-}
 
-}
+	public void sendMessage(CommandSender sender, String message) {
+		if (!message.equals("")) {
+			sender.sendMessage(Generic.parseColor(message));
+		}
+	}
 
-public void debug(String message) {
-if (config.varDebug) {
-log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
-}
-}
+	public void broadcasta(String message) {
+		if (!message.equals("") && (config.varBroadcast)) {
+			getServer().broadcastMessage(Generic.parseColor(message));
+			log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
+		}
 
-public void warn(String message) {
-log.warning(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
-}
+	}
+	public void broadcastb(String message) {
+		if (!message.equals("") && (config.backupBroadcast)) {
+			getServer().broadcastMessage(Generic.parseColor(message));
+			log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
+		}
 
-public void warn(String message, Exception e) {
-log.log(Level.WARNING, String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)), e);
-}
+	}
+	public void broadcastc(String message) {
+		if (!message.equals("") && (config.purgeBroadcast)) {
+			getServer().broadcastMessage(Generic.parseColor(message));
+			log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
+		}
+
+	}
+
+	public void debug(String message) {
+		if (config.varDebug) {
+			log.info(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
+		}
+	}
+
+	public void warn(String message) {
+		log.warning(String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)));
+	}
+
+	public void warn(String message, Exception e) {
+		log.log(Level.WARNING, String.format("[%s] %s", getDescription().getName(), Generic.stripColor(message)), e);
+	}
 
 }
